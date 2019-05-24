@@ -7,7 +7,17 @@
             [linked.core :as linked]
             [reagent.core :as r]))
 
-(frp/defe cancel save edit typing all correct wrong deleted down up)
+(frp/defe cancel
+          save
+          edit
+          typing
+          all
+          correct
+          wrong
+          deleted
+          down
+          up
+          source-current)
 
 (def review
   (->> edit
@@ -19,7 +29,7 @@
   (->> typing
        (frp/stepper "")
        (frp/snapshot save)
-       (m/<$> (comp linked/set
+       (m/<$> (comp (partial apply linked/set)
                     str/split-lines
                     last))))
 
@@ -45,9 +55,44 @@
        (m/<$> (partial apply aid/funcall))
        (m/<> words)))
 
-(def current
-  ;TODO implement this event
-  (m/<$> first words))
+(def above
+  (m/<$> (fn [[_ current words*]]
+           (->> words*
+                (take-while (partial not= current))))
+         (frp/snapshot up
+                       (frp/stepper "" source-current)
+                       (frp/stepper [] filtered-words))))
+
+(def below
+  (m/<$> (fn [[_ current words*]]
+           (->> words*
+                (drop-while (partial not= current))
+                rest))
+         (frp/snapshot down
+                       (frp/stepper "" source-current)
+                       (frp/stepper [] filtered-words))))
+
+(def current-behavior
+  (frp/stepper "" source-current))
+
+(def get-movement
+  (partial m/<$> (aid/if-then-else (comp empty?
+                                         last)
+                                   second
+                                   (comp first
+                                         last))))
+
+(def sink-current
+  (m/<> (m/<$> first words)
+        (m/<> (->> above
+                   (m/<$> reverse)
+                   (frp/stepper [])
+                   (frp/snapshot up current-behavior)
+                   get-movement)
+              (->> below
+                   (frp/stepper [])
+                   (frp/snapshot down current-behavior)
+                   get-movement))))
 
 (def edit-component
   [:form
@@ -73,6 +118,11 @@
 
 (frp/run (partial (aid/flip r/render) (js/document.getElementById "app"))
          app-view)
+
+(def loop-event
+  (partial run! (partial apply frp/run)))
+
+(loop-event {source-current sink-current})
 
 (defn bind
   [s e]
