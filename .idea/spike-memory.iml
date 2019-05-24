@@ -10,6 +10,8 @@
       <sourceFolder url="file://$MODULE_DIR$/resources" isTestSource="false" />
       <sourceFolder url="file://$MODULE_DIR$/test" isTestSource="true" />
       <sourceFolder url="file://$MODULE_DIR$/src/main" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/script" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/src/helpers" isTestSource="false" />
       <excludeFolder url="file://$MODULE_DIR$/target/default" />
     </content>
     <orderEntry type="inheritedJdk" />

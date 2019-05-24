@@ -114,3 +114,7 @@ typings/
 
 # dotenv environment variables file
 .env
+
+### spike-memory
+resources/out
+resources/main.js
