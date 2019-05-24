@@ -1,2 +1,3 @@
 (defproject spike-memory "0.1.0-SNAPSHOT"
-  :dependencies [[org.clojure/clojure "1.10.0"]])
+  :dependencies [[org.clojure/clojure "1.10.0"]]
+  :plugins [[lein-ancient "0.6.15"]])
