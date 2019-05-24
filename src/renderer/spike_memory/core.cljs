@@ -2,11 +2,12 @@
   (:require [clojure.string :as str]
             [aid.core :as aid]
             [cats.core :as m]
+            cljsjs.mousetrap
             [frp.core :as frp]
             [linked.core :as linked]
             [reagent.core :as r]))
 
-(frp/defe cancel save edit typing)
+(frp/defe cancel save edit typing all correct wrong deleted)
 
 (def review
   (->> edit
@@ -51,5 +52,20 @@
 
 (frp/run (partial (aid/flip r/render) (js/document.getElementById "app"))
          app-view)
+
+(defn bind
+  [s e]
+  (js/Mousetrap.bind s #(e)))
+
+(def bind-keymap
+  (partial run! (partial apply bind)))
+
+(def keymap
+  {"alt+a" all
+   "alt+c" correct
+   "alt+d" deleted
+   "alt+w" wrong})
+
+(bind-keymap keymap)
 
 (frp/activate)
