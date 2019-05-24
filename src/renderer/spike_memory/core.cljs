@@ -7,7 +7,7 @@
             [linked.core :as linked]
             [reagent.core :as r]))
 
-(frp/defe cancel save edit typing all correct wrong deleted)
+(frp/defe cancel save edit typing all correct wrong deleted down up)
 
 (def review
   (->> edit
@@ -85,7 +85,9 @@
   {"alt+a" all
    "alt+c" correct
    "alt+d" deleted
-   "alt+w" wrong})
+   "alt+w" wrong
+   "j"     down
+   "k"     up})
 
 (bind-keymap keymap)
 
