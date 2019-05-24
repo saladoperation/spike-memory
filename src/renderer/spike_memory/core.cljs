@@ -3,6 +3,7 @@
             [aid.core :as aid]
             [cats.core :as m]
             [frp.core :as frp]
+            [linked.core :as linked]
             [reagent.core :as r]))
 
 (frp/defe cancel save edit typing)
@@ -19,6 +20,12 @@
        (frp/snapshot save)
        (m/<$> (comp str/split-lines
                     last))))
+
+(def progress
+  ;TODO implement this event
+  (m/<$> (comp (partial apply linked/map)
+               (partial (aid/flip interleave) (repeat :right)))
+         words))
 
 (def edit-component
   [:form
