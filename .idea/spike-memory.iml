@@ -12,6 +12,7 @@
       <sourceFolder url="file://$MODULE_DIR$/src/main" isTestSource="false" />
       <sourceFolder url="file://$MODULE_DIR$/script" isTestSource="false" />
       <sourceFolder url="file://$MODULE_DIR$/src/helpers" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/src/renderer" isTestSource="false" />
       <excludeFolder url="file://$MODULE_DIR$/target/default" />
     </content>
     <orderEntry type="inheritedJdk" />
