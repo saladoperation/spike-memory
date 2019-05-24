@@ -1,11 +1,11 @@
 (ns spike-memory.helpers
   (:require [clojure.string :as str]))
 
-(def app-name
-  "spike-node")
+#?(:cljs (def electron
+           (js/require "electron")))
 
-(def channel
-  "channel")
+(def app-name
+  "spike-memory")
 
 (def get-path
   (comp (partial str/join "/")
