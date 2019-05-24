@@ -2,7 +2,8 @@
   (:require [aid.core :as aid]
             [cats.core :as m]
             [frp.core :as frp]
-            [reagent.core :as r]))
+            [reagent.core :as r]
+            [clojure.string :as str]))
 
 (frp/defe cancel save edit typing)
 
@@ -11,6 +12,13 @@
        (aid/<$ false)
        (m/<> (aid/<$ true (m/<> cancel save)))
        (frp/stepper true)))
+
+(def words
+  (->> typing
+       (frp/stepper "")
+       (frp/snapshot save)
+       (m/<$> (comp str/split-lines
+                    last))))
 
 (def edit-component
   [:form
