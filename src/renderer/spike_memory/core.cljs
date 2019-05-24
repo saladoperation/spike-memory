@@ -1,9 +1,9 @@
 (ns spike-memory.core
-  (:require [aid.core :as aid]
+  (:require [clojure.string :as str]
+            [aid.core :as aid]
             [cats.core :as m]
             [frp.core :as frp]
-            [reagent.core :as r]
-            [clojure.string :as str]))
+            [reagent.core :as r]))
 
 (frp/defe cancel save edit typing)
 
