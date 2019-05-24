@@ -28,6 +28,10 @@
                (partial (aid/flip interleave) (repeat :right)))
          words))
 
+(def current
+  ;TODO implement this event
+  (m/<$> first words))
+
 (def edit-component
   [:form
    [:textarea {:on-change #(-> %
