@@ -19,7 +19,8 @@
   (->> typing
        (frp/stepper "")
        (frp/snapshot save)
-       (m/<$> (comp str/split-lines
+       (m/<$> (comp linked/set
+                    str/split-lines
                     last))))
 
 (def progress
@@ -31,6 +32,22 @@
 (def current
   ;TODO implement this event
   (m/<$> first words))
+
+(def filtered-words
+  (->> progress
+       (frp/stepper {})
+       (frp/snapshot (->> (m/<> (aid/<$ :correct correct)
+                                (aid/<$ :deleted deleted)
+                                (aid/<$ :wrong wrong))
+                          (m/<$> #(partial filter (comp %
+                                                        val)))
+                          (m/<> (aid/<$ identity all))
+                          (m/<$> #(comp (aid/if-then-else empty?
+                                                          (constantly [])
+                                                          keys)
+                                        %))))
+       (m/<$> (partial apply aid/funcall))
+       (m/<> words)))
 
 (def edit-component
   [:form
