@@ -120,64 +120,18 @@
                                                    justification)}}])
        vec))
 
-(aid/defcurried mnemonic-component
-  [s [path coll]]
-  (let [state (atom aid/nop)]
-    (r/create-class
-      {:component-did-mount    (fn [this]
-                                 (reset!
-                                   state
-                                   #(->> coll
-                                         (s/setval s/AFTER-ELEM
-                                                   {:display "none !important"})
-                                         css
-                                         (.insertCSS (r/dom-node this))))
-                                 (-> this
-                                     r/dom-node
-                                     (.addEventListener "dom-ready" @state)))
-       :component-will-unmount #(-> %
-                                    r/dom-node
-                                    (.removeEventListener "dom-ready" @state))
-       :reagent-render         (fn [_ &]
-                                 ;We currently recommend to not use the webview tag and to consider alternatives, like iframe, Electron's BrowserView, or an architecture that avoids embedded content altogether.
-                                 ;https://electronjs.org/docs/api/webview-tag
-                                 [:webview {:src   (str path s)
-                                            :style {:width "30%"}}])})))
-
 (defn review-component
   [above* current below*]
-  ;TODO add video
-  (->> (linked/map
-         "https://www.oxfordlearnersdictionaries.com/definition/english/"
-         ["#ox-header"
-          "#header"
-          ".menu_button"
-          "#ad_topslot_a"
-          ".entry-header"
-          ".btn"
-          ".xr-gs"
-          ".pron-link"
-          ".social-wrap"
-          "#rightcolumn"
-          "#ox-footer"
-          "a.go-to-top"]
-         "https://duckduckgo.com/?ia=images&iax=images&q="
-         ["#header_wrapper"])
-       (map (partial vector (mnemonic-component current)))
-       (concat [:div
-                {:style {:display "flex"}}
-                [:div
-                 {:on-double-click #(edit)
-                  :style           {:height   "100%"
-                                    :overflow "hidden"
-                                    :width    "150px"}}
-                 [direction-component "end" above*]
-                 [:div {:style {:height          "10%"
-                                :display         "flex"
-                                :flex-direction  "column"
-                                :justify-content "center"}} current]
-                 [direction-component "start" below*]]])
-       vec))
+  [:div
+   {:on-double-click #(edit)
+    :style           {:width  "100%"
+                      :height "100%"}}
+   [direction-component "end" above*]
+   [:div {:style {:height          "10%"
+                  :display         "flex"
+                  :flex-direction  "column"
+                  :justify-content "center"}} current]
+   [direction-component "start" below*]])
 
 (def review-view
   ((aid/lift-a (partial vector review-component))
