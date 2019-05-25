@@ -6,7 +6,12 @@
             [com.rpl.specter :as s]
             [frp.core :as frp]
             [linked.core :as linked]
-            [reagent.core :as r]))
+            [reagent.core :as r]
+            [spike-memory.helpers :as helpers]))
+
+(def remote
+  helpers/electron.remote)
+
 
 (frp/defe cancel
           edit
@@ -168,19 +173,24 @@
              source-redraw  sink-redraw})
 
 (defn bind
-  [s e]
-  (js/Mousetrap.bind s #(e)))
+  [menu s e]
+  (->> #js{:accelerator s
+           :click       #(e)}
+       (remote.MenuItem.)
+       (.append menu)))
 
 (def bind-keymap
-  (partial run! (partial apply bind)))
+  #(let [menu (remote.Menu.getApplicationMenu)]
+     (run! (partial apply bind menu) %)
+     (remote.Menu.setApplicationMenu menu)))
 
 (def keymap
-  {"alt+a" all
-   "alt+r" right
-   "alt+d" deleted
-   "alt+w" wrong
-   "j"     down
-   "k"     up})
+  {"Alt+A" all
+   "Alt+R" right
+   "Alt+D" deleted
+   "Alt+W" wrong
+   "J"     down
+   "K"     up})
 
 (bind-keymap keymap)
 
