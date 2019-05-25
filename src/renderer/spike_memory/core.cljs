@@ -13,7 +13,6 @@
 (def remote
   helpers/electron.remote)
 
-
 (frp/defe cancel
           edit
           typing
