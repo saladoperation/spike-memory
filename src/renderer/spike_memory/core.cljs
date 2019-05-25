@@ -5,6 +5,7 @@
             cljsjs.mousetrap
             [com.rpl.specter :as s]
             [frp.core :as frp]
+            [garden.core :refer [css]]
             [linked.core :as linked]
             [reagent.core :as r]
             [spike-memory.helpers :as helpers]))
@@ -121,16 +122,42 @@
                                                      justification)}}])))
 
 (aid/defcurried mnemonic-component
-  [s path]
-  [:webview {:src   (str path s)
-             :style {:width "30%"}}])
+  [s [path coll]]
+  (r/create-class
+    {:component-did-mount (fn [this]
+                            (-> this
+                                r/dom-node
+                                (.addEventListener
+                                  "dom-ready"
+                                  #(->> coll
+                                        (s/setval s/AFTER-ELEM
+                                                  {:display "none !important"})
+                                        css
+                                        (.insertCSS (r/dom-node this))))))
+     :reagent-render      (fn [_ &]
+                            [:webview {:src   (str path s)
+                                       :style {:width "30%"}}])}))
 
 (defn review-component
   [above* current below*]
   ;TODO add video
-  (->> ["https://www.oxfordlearnersdictionaries.com/definition/english/"
-        "https://duckduckgo.com/?ia=images&iax=images&q="]
-       (mapv (mnemonic-component current))
+  (->> (linked/map
+         "https://www.oxfordlearnersdictionaries.com/definition/english/"
+         ["#ox-header"
+          "#header"
+          ".menu_button"
+          "#ad_topslot_a"
+          ".entry-header"
+          ".btn"
+          ".xr-gs"
+          ".pron-link"
+          ".social-wrap"
+          "#rightcolumn"
+          "#ox-footer"
+          "a.go-to-top"]
+         "https://duckduckgo.com/?ia=images&iax=images&q="
+         ["#header_wrapper"])
+       (mapv (partial vector (mnemonic-component current)))
        (s/setval s/BEGINNING
                  [:div
                   {:style {:display "flex"}}
@@ -147,7 +174,7 @@
                    [direction-component "start" below*]]])))
 
 (def review-view
-  ((aid/lift-a review-component)
+  ((aid/lift-a (partial vector review-component))
     above
     current-behavior
     below))
@@ -159,7 +186,7 @@
     edit-component))
 
 (def app-view
-  ((aid/lift-a app-component)
+  ((aid/lift-a (partial vector app-component))
     review
     review-view))
 

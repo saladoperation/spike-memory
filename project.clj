@@ -5,6 +5,7 @@
                  [cljsjs/mousetrap "1.6.2-0"]
                  [frankiesardo/linked "1.3.0"]
                  [frp "0.1.3"]
+                 [garden "1.3.9"]
                  [reagent "0.8.1"]]
   :plugins [[lein-ancient "0.6.15"]]
   :source-paths ["src/helpers"]
