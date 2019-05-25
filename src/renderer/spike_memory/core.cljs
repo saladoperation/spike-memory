@@ -125,19 +125,19 @@
   (let [state (atom aid/nop)]
     (r/create-class
       {:component-did-mount    (fn [this]
-                                 (reset! state
-                                         #(->> coll
-                                               (s/setval s/AFTER-ELEM
-                                                         {:display "none !important"})
-                                               css
-                                               (.insertCSS (r/dom-node this))))
+                                 (reset!
+                                   state
+                                   #(->> coll
+                                         (s/setval s/AFTER-ELEM
+                                                   {:display "none !important"})
+                                         css
+                                         (.insertCSS (r/dom-node this))))
                                  (-> this
                                      r/dom-node
                                      (.addEventListener "dom-ready" @state)))
        :component-will-unmount #(-> %
                                     r/dom-node
-                                    (.removeEventListener "dom-ready"
-                                                          @state))
+                                    (.removeEventListener "dom-ready" @state))
        :reagent-render         (fn [_ &]
                                  ;We currently recommend to not use the webview tag and to consider alternatives, like iframe, Electron's BrowserView, or an architecture that avoids embedded content altogether.
                                  ;https://electronjs.org/docs/api/webview-tag
