@@ -2,10 +2,7 @@
   (:require [clojure.string :as str]
             [aid.core :as aid]
             [cats.core :as m]
-            cljsjs.mousetrap
-            [com.rpl.specter :as s]
             [frp.core :as frp]
-            [garden.core :refer [css]]
             [linked.core :as linked]
             [reagent.core :as r]
             [spike-memory.helpers :as helpers]))
