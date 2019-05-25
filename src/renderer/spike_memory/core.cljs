@@ -115,15 +115,31 @@
                                :justify-content (str "flex-"
                                                      justification)}}])))
 
+(aid/defcurried mnemonic-component
+  [s path]
+  [:webview {:src   (str path s)
+             :style {:width "30%"}}])
+
 (defn review-component
   [above* current below*]
-  [:div {:on-double-click #(edit)
-         :style           {:height   "100%"
-                           :overflow "hidden"
-                           :width    "150px"}}
-   [direction-component "end" above*]
-   [:div {:style {:height "10%"}} current]
-   [direction-component "start" below*]])
+  ;TODO add video
+  (->> ["https://www.oxfordlearnersdictionaries.com/definition/english/"
+        "https://duckduckgo.com/?ia=images&iax=images&q="]
+       (mapv (mnemonic-component current))
+       (s/setval s/BEGINNING
+                 [:div
+                  {:style {:display "flex"}}
+                  [:div
+                   {:on-double-click #(edit)
+                    :style           {:height   "100%"
+                                      :overflow "hidden"
+                                      :width    "150px"}}
+                   [direction-component "end" above*]
+                   [:div {:style {:height          "10%"
+                                  :display         "flex"
+                                  :flex-direction  "column"
+                                  :justify-content "center"}} current]
+                   [direction-component "start" below*]]])))
 
 (def review-view
   ((aid/lift-a review-component)
