@@ -7,7 +7,14 @@
                  [frp "0.1.3"]
                  [garden "1.3.9"]
                  [reagent "0.8.1"]]
-  :plugins [[lein-ancient "0.6.15"]]
+  :plugins [[lein-ancient "0.6.15"]
+            [lein-cljsbuild "1.1.7"]]
   :source-paths ["src/helpers"]
   :profiles {:dev {:dependencies [[binaryage/devtools "0.9.10"]
-                                  [figwheel-sidecar "0.5.18"]]}})
+                                  [figwheel-sidecar "0.5.18"]]}}
+  :cljsbuild {:builds
+              {:renderer {:source-paths ["src/helpers" "src/renderer"]
+                          :compiler     {:output-to       "resources/public/js/main.js"
+                                         :optimizations   :simple
+                                         :main            spike-memory.core
+                                         :closure-defines {goog.DEBUG false}}}}})
