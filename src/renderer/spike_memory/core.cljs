@@ -5,18 +5,21 @@
             cljsjs.mousetrap
             [frp.core :as frp]
             [linked.core :as linked]
-            [reagent.core :as r]))
+            [reagent.core :as r]
+            [com.rpl.specter :as s]))
 
 (frp/defe cancel
-          save
           edit
           typing
           all
-          correct
+          right
           wrong
           deleted
           down
           up
+          sink-save
+          save
+          source-redraw
           source-current)
 
 (def review
@@ -39,38 +42,38 @@
                (partial (aid/flip interleave) (repeat :right)))
          words))
 
-(def filtered-words
-  (->> progress
-       (frp/stepper {})
-       (frp/snapshot (->> (m/<> (aid/<$ :correct correct)
-                                (aid/<$ :deleted deleted)
-                                (aid/<$ :wrong wrong))
-                          (m/<$> #(partial filter (comp %
-                                                        val)))
-                          (m/<> (aid/<$ identity all))
-                          (m/<$> #(comp (aid/if-then-else empty?
-                                                          (constantly [])
-                                                          keys)
-                                        %))))
-       (m/<$> (partial apply aid/funcall))
-       (m/<> words)))
+(def filter-status
+  (->> (m/<> (aid/<$ :right right)
+             (aid/<$ :deleted deleted)
+             (aid/<$ :wrong wrong))
+       (m/<$> #(partial filter (comp (partial = %)
+                                     val)))
+       (m/<> (aid/<$ identity all))
+       (frp/stepper identity)))
+
+(def sink-redraw
+  (m/<> save up down all right deleted wrong))
+
+(defn get-direction
+  [f g]
+  (->> (frp/snapshot source-redraw
+                     (frp/stepper "" source-current)
+                     filter-status
+                     (frp/stepper {} progress))
+       (m/<$> (fn [[_ current filter-status* progress*]]
+                (->> progress*
+                     (f (comp (partial not= current)
+                              key))
+                     g
+                     filter-status*
+                     keys)))
+       (frp/stepper [])))
 
 (def above
-  (m/<$> (fn [[_ current words*]]
-           (->> words*
-                (take-while (partial not= current))))
-         (frp/snapshot up
-                       (frp/stepper "" source-current)
-                       (frp/stepper [] filtered-words))))
+  (get-direction take-while identity))
 
 (def below
-  (m/<$> (fn [[_ current words*]]
-           (->> words*
-                (drop-while (partial not= current))
-                rest))
-         (frp/snapshot down
-                       (frp/stepper "" source-current)
-                       (frp/stepper [] filtered-words))))
+  (get-direction drop-while rest))
 
 (def current-behavior
   (frp/stepper "" source-current))
@@ -86,11 +89,9 @@
   (m/<> (m/<$> first words)
         (m/<> (->> above
                    (m/<$> reverse)
-                   (frp/stepper [])
                    (frp/snapshot up current-behavior)
                    get-movement)
               (->> below
-                   (frp/stepper [])
                    (frp/snapshot down current-behavior)
                    get-movement))))
 
@@ -102,19 +103,44 @@
    [:button {:on-click #(cancel)} "Cancel"]
    [:button {:on-click #(save)} "Save"]])
 
-(def review-view
+(defn direction-component
+  [justification direction*]
+  (->> direction*
+       (mapv (partial vector :li))
+       (s/setval s/BEGINNING
+                 [:ul {:style {:display         "flex"
+                               :flex-direction  "column"
+                               :height          "45%"
+                               :margin          0
+                               :justify-content (str "flex-"
+                                                     justification)}}])))
+
+(defn review-component
+  [above* current below*]
   [:div {:on-double-click #(edit)
          :style           {:height   "100%"
                            :overflow "hidden"
-                           :width    "150px"}}])
+                           :width    "150px"}}
+   [direction-component "end" above*]
+   [:div {:style {:height "10%"}} current]
+   [direction-component "start" below*]])
 
-(def app-component
-  #(if %
-     review-view
-     edit-component))
+(def review-view
+  ((aid/lift-a review-component)
+    above
+    current-behavior
+    below))
+
+(defn app-component
+  [review* review-view*]
+  (if review*
+    review-view*
+    edit-component))
 
 (def app-view
-  (m/<$> app-component review))
+  ((aid/lift-a app-component)
+    review
+    review-view))
 
 (frp/run (partial (aid/flip r/render) (js/document.getElementById "app"))
          app-view)
@@ -122,7 +148,8 @@
 (def loop-event
   (partial run! (partial apply frp/run)))
 
-(loop-event {source-current sink-current})
+(loop-event {source-current sink-current
+             source-redraw  sink-redraw})
 
 (defn bind
   [s e]
@@ -133,7 +160,7 @@
 
 (def keymap
   {"alt+a" all
-   "alt+c" correct
+   "alt+r" right
    "alt+d" deleted
    "alt+w" wrong
    "j"     down
