@@ -3,10 +3,10 @@
             [aid.core :as aid]
             [cats.core :as m]
             cljsjs.mousetrap
+            [com.rpl.specter :as s]
             [frp.core :as frp]
             [linked.core :as linked]
-            [reagent.core :as r]
-            [com.rpl.specter :as s]))
+            [reagent.core :as r]))
 
 (frp/defe cancel
           edit
