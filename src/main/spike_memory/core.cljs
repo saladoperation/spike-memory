@@ -15,17 +15,24 @@
 (.on app
      "ready"
      (fn [_]
-         (let [window-state (window-state-keeper. {})]
-              (doto
-                (helpers/electron.BrowserWindow. window-state)
-                (.loadURL
-                  (->> "index.html"
-                       (helpers/get-path helpers/public)
-                       (path.join (aid/if-else (comp (partial =
-                                                              helpers/resources)
-                                                     fs/basename)
-                                               (comp fs/dirname
-                                                     fs/dirname)
-                                               js/__dirname))
-                       (str "file://")))
-                window-state.manage))))
+       (let [window-state (window-state-keeper. {})]
+         (doto
+           (-> {:height         window-state.height
+                :webPreferences {:nodeIntegration true
+                                 :webviewTag      true}
+                :width          window-state.width
+                :x              window-state.x
+                :y              window-state.y}
+               clj->js
+               helpers/electron.BrowserWindow.)
+           (.loadURL
+             (->> "index.html"
+                  (helpers/get-path helpers/public)
+                  (path.join (aid/if-else (comp (partial =
+                                                         helpers/resources)
+                                                fs/basename)
+                                          (comp fs/dirname
+                                                fs/dirname)
+                                          js/__dirname))
+                  (str "file://")))
+           window-state.manage))))
