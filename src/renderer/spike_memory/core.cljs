@@ -111,14 +111,14 @@
 (defn direction-component
   [justification direction*]
   (->> direction*
-       (mapv (partial vector :li))
-       (s/setval s/BEGINNING
-                 [:ul {:style {:display         "flex"
-                               :flex-direction  "column"
-                               :height          "45%"
-                               :margin          0
-                               :justify-content (str "flex-"
-                                                     justification)}}])))
+       (map (partial vector :li))
+       (concat [:ul {:style {:display         "flex"
+                             :flex-direction  "column"
+                             :height          "45%"
+                             :margin          0
+                             :justify-content (str "flex-"
+                                                   justification)}}])
+       vec))
 
 (aid/defcurried mnemonic-component
   [s [path coll]]
@@ -163,21 +163,21 @@
           "a.go-to-top"]
          "https://duckduckgo.com/?ia=images&iax=images&q="
          ["#header_wrapper"])
-       (mapv (partial vector (mnemonic-component current)))
-       (s/setval s/BEGINNING
-                 [:div
-                  {:style {:display "flex"}}
-                  [:div
-                   {:on-double-click #(edit)
-                    :style           {:height   "100%"
-                                      :overflow "hidden"
-                                      :width    "150px"}}
-                   [direction-component "end" above*]
-                   [:div {:style {:height          "10%"
-                                  :display         "flex"
-                                  :flex-direction  "column"
-                                  :justify-content "center"}} current]
-                   [direction-component "start" below*]]])))
+       (map (partial vector (mnemonic-component current)))
+       (concat [:div
+                {:style {:display "flex"}}
+                [:div
+                 {:on-double-click #(edit)
+                  :style           {:height   "100%"
+                                    :overflow "hidden"
+                                    :width    "150px"}}
+                 [direction-component "end" above*]
+                 [:div {:style {:height          "10%"
+                                :display         "flex"
+                                :flex-direction  "column"
+                                :justify-content "center"}} current]
+                 [direction-component "start" below*]]])
+       vec))
 
 (def review-view
   ((aid/lift-a (partial vector review-component))
