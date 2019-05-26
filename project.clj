@@ -18,7 +18,12 @@
   :profiles {:dev {:dependencies [[binaryage/devtools "0.9.10"]
                                   [figwheel-sidecar "0.5.18"]]}}
   :cljsbuild {:builds
-              {:renderer {:source-paths ["src/helpers" "src/renderer"]
+              {:main     {:source-paths ["src/helpers" "src/main"]
+                          :compiler     {:output-to       "resources/main.js"
+                                         :optimizations   :simple
+                                         :main            spike-memory.core
+                                         :closure-defines {goog.DEBUG false}}}
+               :renderer {:source-paths ["src/helpers" "src/renderer"]
                           :compiler     {:output-to       "resources/public/js/main.js"
                                          :optimizations   :simple
                                          :main            spike-memory.core
