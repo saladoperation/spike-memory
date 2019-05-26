@@ -77,18 +77,16 @@
 
 (defn get-direction
   [f g]
-  (->> (frp/snapshot source-redraw
-                     current-behavior
-                     filter-status
-                     progress-behavior)
-       (m/<$> (fn [[_ current filter-status* progress*]]
-                (->> progress*
-                     (f (comp (partial not= current)
-                              key))
-                     g
-                     filter-status*
-                     keys)))
-       (frp/stepper [])))
+  ((aid/lift-a (fn [current filter-status* progress*]
+                 (->> progress*
+                      (f (comp (partial not= current)
+                               key))
+                      g
+                      filter-status*
+                      keys)))
+    current-behavior
+    filter-status
+    progress-behavior))
 
 (def above
   (get-direction take-while identity))
@@ -220,15 +218,20 @@
 
 (aid/defcurried render-content
   [word [window config]]
-  (-> window
-      (.loadURL (-> config
-                    :path
-                    (str word)))
-      (.then #(-> config
-                  :selectors
-                  get-css
-                  window.webContents.insertCSS))
-      (.catch aid/nop)))
+  (try (-> window
+           (.loadURL (-> config
+                         :path
+                         (str word)))
+           (.then #(-> config
+                       :selectors
+                       get-css
+                       window.webContents.insertCSS))
+           ;the catch clause works around the following error.
+           ;Uncaught (in promise) Error: ERR_ABORTED (-3) loading
+           (.catch aid/nop))
+       ;the catch clause works around the following error.
+       ;Uncaught Error: Could not call remote function 'loadURL'. Check that the function signature is correct. Underlying error: Object has been destroyed
+       (catch js/Error _)))
 
 (frp/run (comp (partial (aid/flip run!) contents)
                render-content)
