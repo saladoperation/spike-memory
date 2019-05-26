@@ -52,7 +52,6 @@
          words))
 
 (def progress-behavior
-  ;TODO implement this event
   (frp/stepper (get-in local-storage [:state :progress] (linked/map))
                progress-event))
 
@@ -73,10 +72,13 @@
 (def sink-redraw
   (m/<> save up down all right deleted wrong))
 
+(def current-behavior
+  (frp/stepper (get-in local-storage [:state :current] "") source-current))
+
 (defn get-direction
   [f g]
   (->> (frp/snapshot source-redraw
-                     (frp/stepper "" source-current)
+                     current-behavior
                      filter-status
                      progress-behavior)
        (m/<$> (fn [[_ current filter-status* progress*]]
@@ -93,9 +95,6 @@
 
 (def below
   (get-direction drop-while rest))
-
-(def current-behavior
-  (frp/stepper (get-in local-storage [:state :behavior] "") source-current))
 
 (def state
   (->> ((aid/lift-a (comp (partial zipmap [:progress :current :status])
@@ -234,6 +233,8 @@
 (frp/run (comp (partial (aid/flip run!) contents)
                render-content)
          sink-current)
+
+(frp/run (partial assoc! local-storage :state) state)
 
 (defn bind
   [menu s e]
