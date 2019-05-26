@@ -181,9 +181,9 @@
              source-redraw  sink-redraw})
 
 (def get-window
-  #(let [window-state (window-state-keeper. #js {:file (str "window-state/"
-                                                            %
-                                                            ".json")})]
+  #(let [window-state (window-state-keeper. #js{:file (str "window-state/"
+                                                           %
+                                                           ".json")})]
      (doto
        (remote.BrowserWindow. window-state)
        window-state.manage)))
