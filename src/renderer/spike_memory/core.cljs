@@ -145,8 +145,8 @@
   [above* current below*]
   [:div
    {:on-double-click #(edit)
-    :style           {:width  "100%"
-                      :height "100%"}}
+    :style           {:height "100%"
+                      :width  "100%"}}
    [direction-component "end" above*]
    [:div {:style {:height          "10%"
                   :display         "flex"
