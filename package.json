@@ -1,5 +1,7 @@
 {
+  "name": "spike-memory",
   "main": "resources/main.js",
+  "version": "0.1.0",
   "devDependencies": {
     "electron": "5.0.2",
     "electron-builder": "20.41.0",
