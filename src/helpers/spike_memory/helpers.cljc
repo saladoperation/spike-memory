@@ -1,9 +1,6 @@
 (ns spike-memory.helpers
   (:require [clojure.string :as str]))
 
-#?(:cljs (def electron
-           (js/require "electron")))
-
 (def app-name
   "spike-memory")
 

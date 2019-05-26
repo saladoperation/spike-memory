@@ -9,8 +9,11 @@
 (def window-state-keeper
   (js/require "electron-window-state"))
 
+(def electron
+  (js/require "electron"))
+
 (def app
-  (.-app helpers/electron))
+  (.-app electron))
 
 (.on app
      "ready"
@@ -24,7 +27,7 @@
                 :x              window-state.x
                 :y              window-state.y}
                clj->js
-               helpers/electron.BrowserWindow.)
+               electron.BrowserWindow.)
            (.loadURL
              (->> "index.html"
                   (helpers/get-path helpers/public)

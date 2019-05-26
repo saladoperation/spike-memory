@@ -2,13 +2,20 @@
   (:require [clojure.string :as str]
             [aid.core :as aid]
             [cats.core :as m]
+            [com.rpl.specter :as s]
             [frp.core :as frp]
+            [garden.core :refer [css]]
             [linked.core :as linked]
-            [reagent.core :as r]
-            [spike-memory.helpers :as helpers]))
+            [reagent.core :as r]))
+
+(def electron
+  (js/require "electron"))
 
 (def remote
-  helpers/electron.remote)
+  electron.remote)
+
+(def window-state-keeper
+  (js/require "electron-window-state"))
 
 (frp/defe cancel
           edit
@@ -97,6 +104,23 @@
                    (frp/snapshot down current-behavior)
                    get-movement))))
 
+(def configs
+  (linked/set {:path      "https://www.oxfordlearnersdictionaries.com/definition/english/"
+               :selectors ["#ox-header"
+                           "#header"
+                           ".menu_button"
+                           "#ad_topslot_a"
+                           ".entry-header"
+                           ".btn"
+                           ".xr-gs"
+                           ".pron-link"
+                           ".social-wrap"
+                           "#rightcolumn"
+                           "#ox-footer"
+                           "a.go-to-top"]}
+              {:path      "https://duckduckgo.com/?ia=images&iax=images&q="
+               :selectors ["#header_wrapper"]}))
+
 (def edit-component
   [:form
    [:textarea {:on-change #(-> %
@@ -155,6 +179,42 @@
 
 (loop-event {source-current sink-current
              source-redraw  sink-redraw})
+
+(def get-window
+  #(let [window-state (window-state-keeper. #js {:file (str "window-state/"
+                                                            %
+                                                            ".json")})]
+     (doto
+       (remote.BrowserWindow. window-state)
+       window-state.manage)))
+
+(defonce contents
+  (->> configs
+       (map-indexed (fn [k v]
+                      [(get-window k) v]))
+       (into (linked/map))))
+
+(def get-css
+  (comp css
+        (partial s/setval*
+                 s/AFTER-ELEM
+                 {:display "none !important"})))
+
+(aid/defcurried render-content
+  [word [window config]]
+  (-> window
+      (.loadURL (-> config
+                    :path
+                    (str word)))
+      (.then #(-> config
+                  :selectors
+                  get-css
+                  window.webContents.insertCSS))
+      (.catch aid/nop)))
+
+(frp/run (comp (partial (aid/flip run!) contents)
+               render-content)
+         sink-current)
 
 (defn bind
   [menu s e]
