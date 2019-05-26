@@ -46,20 +46,29 @@
                     str/split-lines
                     last))))
 
-(def progress
-  ;TODO implement this event
+(def progress-event
   (m/<$> (comp (partial apply linked/map)
                (partial (aid/flip interleave) (repeat :right)))
          words))
 
+(def progress-behavior
+  ;TODO implement this event
+  (frp/stepper (get-in local-storage [:state :progress] (linked/map))
+               progress-event))
+
+(def status
+  (frp/stepper (get-in local-storage [:state :status] :all)
+               (m/<> (aid/<$ :all all)
+                     (aid/<$ :right right)
+                     (aid/<$ :deleted deleted)
+                     (aid/<$ :wrong wrong))))
+
 (def filter-status
-  (->> (m/<> (aid/<$ :right right)
-             (aid/<$ :deleted deleted)
-             (aid/<$ :wrong wrong))
-       (m/<$> #(partial filter (comp (partial = %)
-                                     val)))
-       (m/<> (aid/<$ identity all))
-       (frp/stepper identity)))
+  (->> status
+       (m/<$> (aid/if-then-else (partial = :all)
+                                (constantly identity)
+                                #(partial filter (comp (partial = %)
+                                                       val))))))
 
 (def sink-redraw
   (m/<> save up down all right deleted wrong))
@@ -69,7 +78,7 @@
   (->> (frp/snapshot source-redraw
                      (frp/stepper "" source-current)
                      filter-status
-                     (frp/stepper {} progress))
+                     progress-behavior)
        (m/<$> (fn [[_ current filter-status* progress*]]
                 (->> progress*
                      (f (comp (partial not= current)
@@ -86,7 +95,16 @@
   (get-direction drop-while rest))
 
 (def current-behavior
-  (frp/stepper "" source-current))
+  (frp/stepper (get-in local-storage [:state :behavior] "") source-current))
+
+(def state
+  (->> ((aid/lift-a (comp (partial zipmap [:progress :current :status])
+                          vector))
+         progress-behavior
+         current-behavior
+         status)
+       (frp/snapshot progress-event)
+       (m/<$> last)))
 
 (def get-movement
   (partial m/<$> (aid/if-then-else (comp empty?
