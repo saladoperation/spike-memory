@@ -5,6 +5,12 @@
                  [frankiesardo/linked "1.3.0"]
                  [frp "0.1.3"]
                  [garden "1.3.9"]
+                 ;alandipert.storage-atom  doesn't retain linked/map
+                 ;=> (type @(-> (linked/map)
+                 ;              atom
+                 ;              (local-storage :state)))
+                 ;cljs.core/PersistentArrayMap
+                 [hodgepodge "0.1.3"]
                  [reagent "0.8.1"]]
   :plugins [[lein-ancient "0.6.15"]
             [lein-cljsbuild "1.1.7"]]
