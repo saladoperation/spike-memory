@@ -16,8 +16,7 @@
   ["zip"])
 
 (def config
-  {:config  {:directories      {:output output}
-             :fileAssociations {:ext helpers/app-name}}
+  {:config  {:directories {:output output}}
    :linux   target
    :mac     target
    :publish "always"})
