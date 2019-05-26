@@ -1,6 +1,5 @@
 (ns spike-memory.core
-  (:require [cljs-node-io.fs :as fs]
-            [spike-memory.helpers :as helpers]))
+  (:require [cljs-node-io.fs :as fs]))
 
 (def builder
   (js/require "electron-builder"))
