@@ -29,8 +29,8 @@
           up
           sink-save
           save
-          source-redraw
-          source-current)
+          source-current
+          source-progress)
 
 (def review
   (->> edit
@@ -46,14 +46,14 @@
                     str/split-lines
                     last))))
 
-(def progress-event
+(def sink-progress
   (m/<$> (comp (partial apply linked/map)
                (partial (aid/flip interleave) (repeat :right)))
          words))
 
 (def progress-behavior
   (frp/stepper (get-in local-storage [:state :progress] (linked/map))
-               progress-event))
+               sink-progress))
 
 (def status
   (frp/stepper (get-in local-storage [:state :status] :all)
@@ -68,9 +68,6 @@
                                 (constantly identity)
                                 #(partial filter (comp (partial = %)
                                                        val))))))
-
-(def sink-redraw
-  (m/<> save up down all right deleted wrong))
 
 (def current-behavior
   (frp/stepper (get-in local-storage [:state :current] "") source-current))
@@ -100,7 +97,7 @@
          progress-behavior
          current-behavior
          status)
-       (frp/snapshot progress-event)
+       (frp/snapshot source-progress)
        (m/<$> last)))
 
 (def get-movement
@@ -193,8 +190,8 @@
 (def loop-event
   (partial run! (partial apply frp/run)))
 
-(loop-event {source-current sink-current
-             source-redraw  sink-redraw})
+(loop-event {source-current  sink-current
+             source-progress sink-progress})
 
 (def get-window
   #(let [window-state (window-state-keeper. #js{:file (str "window-state/"
