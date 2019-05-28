@@ -35,7 +35,7 @@
       (path.join "config.edn")))
 
 (def default-config
-  {:windows (linked/set {:path      "https://www.oxfordlearnersdictionaries.com/definition/english/"
+  {:windows (linked/set {:url       "https://www.oxfordlearnersdictionaries.com/definition/english/"
                          :selectors ["div#ad_contentslot_1"
                                      "#ox-header"
                                      "#header"
@@ -50,7 +50,7 @@
                                      "#rightcolumn"
                                      "#ox-footer"
                                      "a.go-to-top"]}
-                        {:path      "https://duckduckgo.com/?ia=images&iax=images&q="
+                        {:url       "https://duckduckgo.com/?ia=images&iax=images&q="
                          :selectors ["#header_wrapper"]})})
 
 (def default-config-text
@@ -362,7 +362,7 @@
   [word [window config]]
   (try (-> window
            (.loadURL (-> config
-                         :path
+                         :url
                          (str word)))
            (.then #(-> config
                        :selectors
