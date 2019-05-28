@@ -3,6 +3,7 @@
             [aid.core :as aid]
             [cats.core :as m]
             [com.rpl.specter :as s]
+            [frp.clojure.core :as core]
             [frp.core :as frp]
             [garden.core :refer [css]]
             [hodgepodge.core :refer [local-storage]]
@@ -49,10 +50,18 @@
                     str/split-lines
                     last))))
 
+(def current-behavior
+  (frp/stepper (get-in local-storage [:state :current] "") source-current))
+
 (def sink-progress
-  (m/<$> (comp (partial apply linked/map)
-               (partial (aid/flip interleave) (repeat :right)))
-         words))
+  (->> current-behavior
+       (frp/snapshot (m/<> (aid/<$ :right right)
+                           (aid/<$ :wrong wrong)))
+       (m/<$> (partial apply (aid/flip array-map)))
+       (m/<> (m/<$> (comp (partial apply linked/map)
+                          (partial (aid/flip interleave) (repeat :right)))
+                    words))
+       core/merge))
 
 (def progress-behavior
   (frp/stepper (get-in local-storage [:state :progress] (linked/map))
@@ -71,9 +80,6 @@
                                 (constantly identity)
                                 #(partial filter (comp (partial = %)
                                                        val))))))
-
-(def current-behavior
-  (frp/stepper (get-in local-storage [:state :current] "") source-current))
 
 (defn get-direction
   [f g]
