@@ -6,7 +6,7 @@
             [frp.clojure.core :as core]
             [frp.core :as frp]
             [garden.core :refer [css]]
-            [hodgepodge.core :refer [local-storage]]
+            [hodgepodge.core :refer [clear! local-storage]]
             [linked.core :as linked]
             [reagent.core :as r]
             [spike-memory.helpers :as helpers]))
@@ -32,6 +32,7 @@
           right
           wrong
           save
+          clear
           source-current
           source-progress)
 
@@ -153,7 +154,8 @@
                                .-target.value
                                typing)}]
    [:button {:on-click #(cancel)} "Cancel"]
-   [:button {:on-click #(save)} "Save"]])
+   [:button {:on-click #(save)} "Save"]
+   [:button {:on-click #(clear)} "Clear"]])
 
 (defn direction-component
   [justification direction*]
@@ -270,6 +272,8 @@
          sink-current)
 
 (frp/run (partial assoc! local-storage :state) state)
+
+(frp/run (partial clear! local-storage) clear)
 
 (def keymap
   {"Alt+A" all-filter
