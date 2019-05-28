@@ -117,6 +117,11 @@
 (def below
   (get-part drop-while rest))
 
+(def copy
+  (get-part (comp last
+                  vector)
+            identity))
+
 (def state
   (->> ((aid/lift-a (comp (partial zipmap [:progress :current :status])
                           vector))
