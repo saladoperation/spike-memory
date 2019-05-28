@@ -129,10 +129,11 @@
        (frp/snapshot yank)
        (m/<$> last)))
 
-(def pronunciation
+(def command
   (->> current-behavior
        (frp/snapshot say)
-       (m/<$> last)))
+       (m/<$> (comp (partial str "say ")
+                    last))))
 
 (def state
   (->> ((aid/lift-a (comp (partial zipmap [:progress :current :status])
@@ -354,6 +355,8 @@
 (frp/run (partial assoc! local-storage :state) state)
 
 (frp/run electron.clipboard.writeText copy)
+
+(frp/run child-process.exec command)
 
 (bind-keymap keymap)
 
