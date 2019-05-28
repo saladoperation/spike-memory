@@ -320,6 +320,19 @@
 
 (bind-keymap keymap)
 
+(def bind-escape
+  #(doto
+     (remote.Menu.getApplicationMenu)
+     (.append (-> {:label   "Focus"
+                   :submenu [{:accelerator "Esc"
+                              :label       ""
+                              :click       focus-window}]}
+                  clj->js
+                  remote.MenuItem.))
+     remote.Menu.setApplicationMenu))
+
+(bind-escape)
+
 (focus-window)
 
 (frp/activate)

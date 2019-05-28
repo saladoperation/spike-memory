@@ -42,15 +42,13 @@
 (.on app
      "ready"
      (fn [_]
-       (let [window-state (window-state-keeper. {})
-             menu (electron.Menu.getApplicationMenu)
-             window (-> window-state
-                        convert-object
-                        (merge {:webPreferences {:nodeIntegration true}})
-                        clj->js
-                        electron.BrowserWindow.)]
+       (let [window-state (window-state-keeper. {})]
          (doto
-           window
+           (-> window-state
+               convert-object
+               (merge {:webPreferences {:nodeIntegration true}})
+               clj->js
+               electron.BrowserWindow.)
            (.loadURL
              (->> "index.html"
                   (helpers/get-path helpers/public)
@@ -61,13 +59,4 @@
                                                 fs/dirname)
                                           js/__dirname))
                   (str "file://")))
-           window-state.manage)
-         (doto
-           menu
-           (.append (-> {:label   "Focus"
-                         :submenu [{:accelerator "Esc"
-                                    :label       ""
-                                    :click       #(.focus window)}]}
-                        clj->js
-                        electron.MenuItem.))
-           electron.Menu.setApplicationMenu))))
+           window-state.manage))))
