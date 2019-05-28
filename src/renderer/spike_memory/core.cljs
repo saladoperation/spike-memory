@@ -1,5 +1,6 @@
 (ns spike-memory.core
   (:require [cljs.tools.reader.edn :as edn]
+            [cljs.pprint :as pprint]
             [clojure.string :as str]
             [aid.core :as aid]
             [cats.core :as m]
@@ -52,8 +53,11 @@
                         {:path      "https://duckduckgo.com/?ia=images&iax=images&q="
                          :selectors ["#header_wrapper"]})})
 
+(def default-config-text
+  (with-out-str (pprint/pprint default-config)))
+
 (aid/if-else fs/fexists?
-             (partial (aid/flip spit) default-config)
+             (partial (aid/flip spit) default-config-text)
              config-path)
 
 (def edn-read-string
