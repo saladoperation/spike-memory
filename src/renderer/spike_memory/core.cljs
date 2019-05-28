@@ -320,15 +320,18 @@
 
 (bind-keymap keymap)
 
+(def menu-item
+  (-> {:label   "Focus"
+       :submenu [{:accelerator "Esc"
+                  :label       ""
+                  :click       focus-window}]}
+      clj->js
+      remote.MenuItem.))
+
 (def bind-escape
   #(doto
      (remote.Menu.getApplicationMenu)
-     (.append (-> {:label   "Focus"
-                   :submenu [{:accelerator "Esc"
-                              :label       ""
-                              :click       focus-window}]}
-                  clj->js
-                  remote.MenuItem.))
+     (.append menu-item)
      remote.Menu.setApplicationMenu))
 
 (bind-escape)
