@@ -29,9 +29,12 @@
 (def remote
   electron.remote)
 
+(def app
+  remote.app)
+
 (def config-path
   (-> "userData"
-      remote.app.getPath
+      app.getPath
       (path.join "config.edn")))
 
 (def default-config
@@ -51,7 +54,10 @@
                                      "#ox-footer"
                                      "a.go-to-top"]}
                         {:url       "https://duckduckgo.com/?ia=images&iax=images&q="
-                         :selectors ["#header_wrapper"]})})
+                         :selectors ["#header_wrapper"]})
+   :path    (->> (app.getName)
+                 (str "new.")
+                 (path.join (app.getPath "documents")))})
 
 (def default-config-text
   (with-out-str (pprint/pprint default-config)))
