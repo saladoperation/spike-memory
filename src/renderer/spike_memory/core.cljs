@@ -120,7 +120,8 @@
 
 (def configs
   (linked/set {:path      "https://www.oxfordlearnersdictionaries.com/definition/english/"
-               :selectors ["#ox-header"
+               :selectors ["div#ad_contentslot_1"
+                           "#ox-header"
                            "#header"
                            ".menu_button"
                            "#ad_topslot_a"
