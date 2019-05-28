@@ -13,11 +13,11 @@
 (def electron
   (js/require "electron"))
 
-(def remote
-  electron.remote)
-
 (def window-state-keeper
   (js/require "electron-window-state"))
+
+(def remote
+  electron.remote)
 
 (frp/defe cancel
           edit
