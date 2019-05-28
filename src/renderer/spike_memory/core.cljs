@@ -75,7 +75,8 @@
       slurp
       edn-read-string))
 
-(frp/defe cancel
+(frp/defe file-path
+          cancel
           edit
           typing
           all-filter
@@ -189,13 +190,15 @@
                     last))))
 
 (def state
-  (->> ((aid/lift-a (comp (partial zipmap [:progress :current :status])
-                          vector))
-         progress-behavior
-         current-behavior
-         status)
-       (frp/snapshot source-progress)
-       (m/<$> last)))
+  (m/<$> rest (frp/snapshot source-progress
+                            (frp/stepper (:path config) file-path)
+                            ((aid/lift-a (comp (partial zipmap [:progress
+                                                                :current
+                                                                :status])
+                                               vector))
+                              progress-behavior
+                              current-behavior
+                              status))))
 
 (def get-movement
   (partial m/<$> (aid/if-then-else (comp empty?
@@ -387,7 +390,7 @@
                  (focus-window)))
          sink-current)
 
-(frp/run (partial assoc! local-storage :state) state)
+(frp/run (partial apply spit) state)
 
 (frp/run electron.clipboard.writeText copy)
 
