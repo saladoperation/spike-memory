@@ -7,7 +7,8 @@
             [garden.core :refer [css]]
             [hodgepodge.core :refer [local-storage]]
             [linked.core :as linked]
-            [reagent.core :as r]))
+            [reagent.core :as r]
+            [spike-memory.helpers :as helpers]))
 
 (def electron
   (js/require "electron"))
@@ -236,18 +237,6 @@
 
 (frp/run (partial assoc! local-storage :state) state)
 
-(defn bind
-  [menu s e]
-  (->> #js{:accelerator s
-           :click       #(e)}
-       (remote.MenuItem.)
-       (.append menu)))
-
-(def bind-keymap
-  #(let [menu (remote.Menu.getApplicationMenu)]
-     (run! (partial apply bind menu) %)
-     (remote.Menu.setApplicationMenu menu)))
-
 (def keymap
   {"Alt+A" all
    "Alt+R" right
@@ -256,6 +245,25 @@
    "J"     down
    "K"     up})
 
-(bind-keymap keymap)
+(def menu
+  (remote.Menu.getApplicationMenu))
+
+(def menu-item
+  (-> {:label   "Shortcuts"
+       :submenu (map (fn [[k v]]
+                       {:accelerator k
+                        :label       ""
+                        :click       #(v)})
+                     keymap)}
+      clj->js
+      remote.MenuItem.))
+
+(defn bind
+  []
+  (menu.append menu-item)
+  (remote.Menu.setApplicationMenu menu))
+
+(defonce bound
+  (bind))
 
 (frp/activate)
