@@ -252,14 +252,8 @@
     review
     review-view))
 
-(frp/run (partial (aid/flip r/render) (js/document.getElementById "app"))
-         app-view)
-
 (def loop-event
   (partial run! (partial apply frp/run)))
-
-(loop-event {source-current  sink-current
-             source-progress sink-progress})
 
 (def get-window
   #(let [window-state (window-state-keeper. #js{:file (str "window-state/"
@@ -269,45 +263,14 @@
        (remote.BrowserWindow. window-state)
        window-state.manage)))
 
-(defonce contents
-  (->> configs
-       (map-indexed (fn [k v]
-                      [(get-window k) v]))
-       (into (linked/map))))
-
 (def get-css
   (comp css
         (partial s/setval*
                  s/AFTER-ELEM
                  {:display "none !important"})))
 
-(aid/defcurried render-content
-  [word [window config]]
-  (try (-> window
-           (.loadURL (-> config
-                         :path
-                         (str word)))
-           (.then #(-> config
-                       :selectors
-                       get-css
-                       window.webContents.insertCSS))
-           ;the catch clause works around the following error.
-           ;Uncaught (in promise) Error: ERR_ABORTED (-3) loading
-           (.catch aid/nop))
-       ;the catch clause works around the following error.
-       ;Uncaught Error: Could not call remote function 'loadURL'. Check that the function signature is correct. Underlying error: Object has been destroyed
-       (catch js/Error _)))
-
 (def focus-window
   #(.focus (electron.remote.getCurrentWindow)))
-
-(frp/run (juxt (comp (partial (aid/flip run!) contents)
-                     render-content)
-               (fn [_]
-                 (focus-window)))
-         sink-current)
-
-(frp/run (partial assoc! local-storage :state) state)
 
 (defn bind
   [s e]
@@ -330,8 +293,6 @@
    "d d"    delete
    "y y"    yank})
 
-(bind-keymap keymap)
-
 (def menu-item
   (-> {:label   "Focus"
        :submenu [{:accelerator "Esc"
@@ -345,6 +306,45 @@
      (remote.Menu.getApplicationMenu)
      (.append menu-item)
      remote.Menu.setApplicationMenu))
+
+(frp/run (partial (aid/flip r/render) (js/document.getElementById "app"))
+         app-view)
+
+(loop-event {source-current  sink-current
+             source-progress sink-progress})
+
+(defonce contents
+  (->> configs
+       (map-indexed (fn [k v]
+                      [(get-window k) v]))
+       (into (linked/map))))
+
+(aid/defcurried render-content
+  [word [window config]]
+  (try (-> window
+           (.loadURL (-> config
+                         :path
+                         (str word)))
+           (.then #(-> config
+                       :selectors
+                       get-css
+                       window.webContents.insertCSS))
+           ;the catch clause works around the following error.
+           ;Uncaught (in promise) Error: ERR_ABORTED (-3) loading
+           (.catch aid/nop))
+       ;the catch clause works around the following error.
+       ;Uncaught Error: Could not call remote function 'loadURL'. Check that the function signature is correct. Underlying error: Object has been destroyed
+       (catch js/Error _)))
+
+(frp/run (juxt (comp (partial (aid/flip run!) contents)
+                     render-content)
+               (fn [_]
+                 (focus-window)))
+         sink-current)
+
+(frp/run (partial assoc! local-storage :state) state)
+
+(bind-keymap keymap)
 
 (bind-escape)
 
