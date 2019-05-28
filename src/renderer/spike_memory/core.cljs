@@ -171,7 +171,7 @@
                :selectors ["#header_wrapper"]}))
 
 (def edit-component
-  [:form
+  [:div
    [:textarea {:on-change #(-> %
                                .-target.value
                                typing)}]
