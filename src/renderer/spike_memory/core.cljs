@@ -53,18 +53,22 @@
 (def current-behavior
   (frp/stepper (get-in local-storage [:state :current] "") source-current))
 
+(def stored-progress
+  (get-in local-storage [:state :progress] (linked/map)))
+
 (def sink-progress
   (->> current-behavior
        (frp/snapshot (m/<> (aid/<$ :right right)
                            (aid/<$ :wrong wrong)))
        (m/<$> (partial apply (aid/flip array-map)))
-       (m/<> (m/<$> (comp (partial apply linked/map)
+       (m/<> (frp/event stored-progress)
+             (m/<$> (comp (partial apply linked/map)
                           (partial (aid/flip interleave) (repeat :right)))
                     words))
        core/merge))
 
 (def progress-behavior
-  (frp/stepper (get-in local-storage [:state :progress] (linked/map))
+  (frp/stepper stored-progress
                sink-progress))
 
 (def status
@@ -164,24 +168,44 @@
                                                    justification)}}])
        vec))
 
+(def get-text-decoration
+  #(case %
+     :wrong "underline"
+     :deleted "line-through"
+     "initial"))
+
+(def get-status-style
+  (comp (partial array-map :text-decoration)
+        get-text-decoration))
+
+(def above-view
+  (m/<$> (partial vector direction-component "end") above))
+
+(def below-view
+  (m/<$> (partial vector direction-component "start") below))
+
 (defn review-component
-  [above* current below*]
+  [above* current below* progress]
   [:div
    {:on-double-click #(edit)
     :style           {:height "100%"
                       :width  "100%"}}
-   [direction-component "end" above*]
-   [:div {:style {:height          "10%"
-                  :display         "flex"
-                  :flex-direction  "column"
-                  :justify-content "center"}} current]
-   [direction-component "start" below*]])
+   above*
+   [:div {:style (->> current
+                      progress
+                      get-status-style
+                      (merge {:height          "10%"
+                              :display         "flex"
+                              :flex-direction  "column"
+                              :justify-content "center"}))} current]
+   below*])
 
 (def review-view
   ((aid/lift-a (partial vector review-component))
-    above
+    above-view
     current-behavior
-    below))
+    below-view
+    progress-behavior))
 
 (defn app-component
   [review* review-view*]
