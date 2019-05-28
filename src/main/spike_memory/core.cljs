@@ -44,8 +44,9 @@
      (fn [_]
        (let [window-state (window-state-keeper. {})
              menu (electron.Menu.getApplicationMenu)
-             window (-> (merge (convert-object window-state)
-                               {:webPreferences {:nodeIntegration true}})
+             window (-> window-state
+                        convert-object
+                        (merge {:webPreferences {:nodeIntegration true}})
                         clj->js
                         electron.BrowserWindow.)]
          (doto
