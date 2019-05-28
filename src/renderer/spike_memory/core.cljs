@@ -33,6 +33,8 @@
           wrong
           save
           clear
+          undo
+          redo
           source-current
           source-progress)
 
@@ -56,16 +58,24 @@
 (def stored-progress
   (get-in local-storage [:state :progress] (linked/map)))
 
+(def size
+  10)
+
 (def sink-progress
-  (->> current-behavior
-       (frp/snapshot (m/<> (aid/<$ :right right)
-                           (aid/<$ :wrong wrong)))
-       (m/<$> (partial apply (aid/flip array-map)))
-       (m/<> (frp/event stored-progress)
-             (m/<$> (comp (partial apply linked/map)
-                          (partial (aid/flip interleave) (repeat :right)))
-                    words))
-       core/merge))
+  (frp/undoable size
+                undo
+                redo
+                [right wrong words]
+                (->> current-behavior
+                     (frp/snapshot (m/<> (aid/<$ :right right)
+                                         (aid/<$ :wrong wrong)))
+                     (m/<$> (partial apply (aid/flip array-map)))
+                     (m/<> (frp/event stored-progress)
+                           (m/<$> (comp (partial apply linked/map)
+                                        (partial (aid/flip interleave)
+                                                 (repeat :right)))
+                                  words))
+                     core/merge)))
 
 (def progress-behavior
   (frp/stepper stored-progress
@@ -284,14 +294,16 @@
 (frp/run (partial clear! local-storage) clear)
 
 (def keymap
-  {"Alt+A" all-filter
-   "Alt+R" right-filter
-   "Alt+D" deleted-filter
-   "Alt+W" wrong-filter
-   "J"     down
-   "K"     up
-   "R"     right
-   "W"     wrong})
+  {"Alt+A"  all-filter
+   "Alt+R"  right-filter
+   "Alt+D"  deleted-filter
+   "Alt+W"  wrong-filter
+   "Ctrl+R" redo
+   "J"      down
+   "K"      up
+   "R"      right
+   "U"      undo
+   "W"      wrong})
 
 (def menu
   (remote.Menu.getApplicationMenu))
