@@ -21,8 +21,7 @@
        (let [window-state (window-state-keeper. {})
              menu (electron.Menu.getApplicationMenu)
              window (-> {:height         window-state.height
-                         :webPreferences {:nodeIntegration true
-                                          :webviewTag      true}
+                         :webPreferences {:nodeIntegration true}
                          :width          window-state.width
                          :x              window-state.x
                          :y              window-state.y}
