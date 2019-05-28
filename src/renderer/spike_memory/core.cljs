@@ -35,6 +35,7 @@
           delete
           save
           clear
+          yank
           undo
           redo
           source-current
@@ -118,9 +119,12 @@
   (get-part drop-while rest))
 
 (def copy
-  (get-part (comp last
-                  vector)
-            identity))
+  (->> (get-part (comp last
+                       vector)
+                 identity)
+       (m/<$> (partial str/join "\n"))
+       (frp/snapshot yank)
+       (m/<$> last)))
 
 (def state
   (->> ((aid/lift-a (comp (partial zipmap [:progress :current :status])
@@ -325,7 +329,8 @@
    "r"      right
    "u"      undo
    "w"      wrong
-   "d d"    delete})
+   "d d"    delete
+   "y y"    yank})
 
 (bind-keymap keymap)
 
