@@ -1,7 +1,10 @@
 (ns spike-memory.core
-  (:require [clojure.string :as str]
+  (:require [cljs.tools.reader.edn :as edn]
+            [clojure.string :as str]
             [aid.core :as aid]
             [cats.core :as m]
+            [cljs-node-io.core :refer [slurp spit]]
+            [cljs-node-io.fs :as fs]
             cljsjs.mousetrap
             [com.rpl.specter :as s]
             [frp.core :as frp]
@@ -29,6 +32,38 @@
   (-> "userData"
       remote.app.getPath
       (path.join "config.edn")))
+
+(def default-config
+  {:windows (linked/set {:path      "https://www.oxfordlearnersdictionaries.com/definition/english/"
+                         :selectors ["div#ad_contentslot_1"
+                                     "#ox-header"
+                                     "#header"
+                                     ".menu_button"
+                                     "#ad_topslot_a"
+                                     ".entry-header"
+                                     ".btn"
+                                     "#rightcolumn"
+                                     "span.dictlinks"
+                                     ".pron-link"
+                                     ".social-wrap"
+                                     "#rightcolumn"
+                                     "#ox-footer"
+                                     "a.go-to-top"]}
+                        {:path      "https://duckduckgo.com/?ia=images&iax=images&q="
+                         :selectors ["#header_wrapper"]})})
+
+(aid/if-else fs/fexists?
+             (partial (aid/flip spit) default-config)
+             config-path)
+
+(def edn-read-string
+  (partial edn/read-string
+           {:readers {'linked/set (partial into (linked/set))}}))
+
+(def config
+  (-> config-path
+      slurp
+      edn-read-string))
 
 (frp/defe cancel
           edit
@@ -168,25 +203,6 @@
               (->> below
                    (frp/snapshot down current-behavior)
                    get-movement))))
-
-(def configs
-  (linked/set {:path      "https://www.oxfordlearnersdictionaries.com/definition/english/"
-               :selectors ["div#ad_contentslot_1"
-                           "#ox-header"
-                           "#header"
-                           ".menu_button"
-                           "#ad_topslot_a"
-                           ".entry-header"
-                           ".btn"
-                           "#rightcolumn"
-                           "span.dictlinks"
-                           ".pron-link"
-                           ".social-wrap"
-                           "#rightcolumn"
-                           "#ox-footer"
-                           "a.go-to-top"]}
-              {:path      "https://duckduckgo.com/?ia=images&iax=images&q="
-               :selectors ["#header_wrapper"]}))
 
 (def edit-component
   [:div
@@ -332,7 +348,8 @@
              source-progress sink-progress})
 
 (defonce contents
-  (->> configs
+  (->> config
+       :windows
        (map-indexed (fn [k v]
                       [(get-window k) v]))
        (into (linked/map))))
