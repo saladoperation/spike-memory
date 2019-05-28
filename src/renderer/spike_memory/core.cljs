@@ -157,18 +157,6 @@
    [:button {:on-click #(save)} "Save"]
    [:button {:on-click #(clear)} "Clear"]])
 
-(defn direction-component
-  [justification direction*]
-  (->> direction*
-       (map (partial vector :li))
-       (concat [:ul {:style {:display         "flex"
-                             :flex-direction  "column"
-                             :height          "45%"
-                             :margin          0
-                             :justify-content (str "flex-"
-                                                   justification)}}])
-       vec))
-
 (def get-text-decoration
   #(case %
      :wrong "underline"
@@ -179,11 +167,31 @@
   (comp (partial array-map :text-decoration)
         get-text-decoration))
 
+(defn direction-component
+  [justification direction* progress]
+  (->> direction*
+       (map (fn [word]
+              [:li
+               {:style (-> word
+                           progress
+                           get-status-style)}
+               word]))
+       (concat [:ul {:style {:display         "flex"
+                             :flex-direction  "column"
+                             :height          "45%"
+                             :margin          0
+                             :justify-content (str "flex-" justification)}}])
+       vec))
+
 (def above-view
-  (m/<$> (partial vector direction-component "end") above))
+  ((aid/lift-a (partial vector direction-component "end"))
+    above
+    progress-behavior))
 
 (def below-view
-  (m/<$> (partial vector direction-component "start") below))
+  ((aid/lift-a (partial vector direction-component "start"))
+    below
+    progress-behavior))
 
 (defn review-component
   [above* current below* progress]
