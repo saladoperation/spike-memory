@@ -345,6 +345,8 @@
 
 (frp/run (partial assoc! local-storage :state) state)
 
+(frp/run electron.clipboard.writeText copy)
+
 (bind-keymap keymap)
 
 (bind-escape)
