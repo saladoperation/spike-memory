@@ -98,7 +98,7 @@
                                 #(partial filter (comp (partial = %)
                                                        val))))))
 
-(defn get-direction
+(defn get-part
   [f g]
   ((aid/lift-a (fn [current filter-status* progress*]
                  (->> progress*
@@ -112,10 +112,10 @@
     progress-behavior))
 
 (def above
-  (get-direction take-while identity))
+  (get-part take-while identity))
 
 (def below
-  (get-direction drop-while rest))
+  (get-part drop-while rest))
 
 (def state
   (->> ((aid/lift-a (comp (partial zipmap [:progress :current :status])
