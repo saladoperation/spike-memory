@@ -32,6 +32,7 @@
           up
           right
           wrong
+          delete
           save
           clear
           undo
@@ -66,10 +67,11 @@
   (frp/undoable size
                 undo
                 redo
-                [right wrong words]
+                [right wrong delete words]
                 (->> current-behavior
                      (frp/snapshot (m/<> (aid/<$ :right right)
-                                         (aid/<$ :wrong wrong)))
+                                         (aid/<$ :wrong wrong)
+                                         (aid/<$ :delete delete)))
                      (m/<$> (partial apply (aid/flip array-map)))
                      (m/<> (frp/event stored-progress)
                            (m/<$> (comp (partial apply linked/map)
@@ -317,7 +319,8 @@
    "k"      up
    "r"      right
    "u"      undo
-   "w"      wrong})
+   "w"      wrong
+   "d d"    delete})
 
 (bind-keymap keymap)
 
