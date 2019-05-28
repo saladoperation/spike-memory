@@ -124,9 +124,6 @@
        (m/<> source-current)
        (frp/stepper "")))
 
-(def stored-progress
-  (get-in local-storage [:state :progress] (linked/map)))
-
 (def size
   10)
 
@@ -134,7 +131,7 @@
   (frp/undoable size
                 undo
                 redo
-                [right wrong delete words]
+                [right wrong delete words file]
                 (->> current-behavior
                      (frp/snapshot (m/<> (aid/<$ :right right)
                                          (aid/<$ :wrong wrong)
@@ -142,16 +139,16 @@
                      (m/<$> (comp (aid/flip (aid/curry 2 merge))
                                   (partial apply array-map)
                                   reverse))
-                     (m/<> (m/<$> (comp constantly
-                                        (partial apply linked/map)
-                                        (partial (aid/flip interleave)
-                                                 (repeat :right)))
-                                  words))
-                     (frp/accum stored-progress))))
+                     (m/<> (->> words
+                                (m/<$> (comp (partial apply linked/map)
+                                             (partial (aid/flip interleave)
+                                                      (repeat :right))))
+                                (m/<> (m/<$> :progress file))
+                                (m/<$> constantly)))
+                     (frp/accum (linked/map)))))
 
 (def progress-behavior
-  (frp/stepper stored-progress
-               sink-progress))
+  (frp/stepper (linked/map) sink-progress))
 
 (def status
   (frp/stepper (get-in local-storage [:state :status] :all)
