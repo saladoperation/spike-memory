@@ -191,13 +191,15 @@
     :style           {:height "100%"
                       :width  "100%"}}
    above*
-   [:div {:style (->> current
-                      progress
-                      get-status-style
-                      (merge {:height          "10%"
-                              :display         "flex"
-                              :flex-direction  "column"
-                              :justify-content "center"}))} current]
+   [:div
+    {:style (->> current
+                 progress
+                 get-status-style
+                 (merge {:height          "10%"
+                         :display         "flex"
+                         :flex-direction  "column"
+                         :justify-content "center"}))}
+    current]
    below*])
 
 (def review-view
