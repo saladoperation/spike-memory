@@ -2,6 +2,7 @@
   (:require [clojure.string :as str]
             [aid.core :as aid]
             [cats.core :as m]
+            cljsjs.mousetrap
             [com.rpl.specter :as s]
             [frp.clojure.core :as core]
             [frp.core :as frp]
@@ -293,37 +294,25 @@
 
 (frp/run (partial clear! local-storage) clear)
 
-(def keymap
-  {"Alt+A"  all-filter
-   "Alt+R"  right-filter
-   "Alt+D"  delete-filter
-   "Alt+W"  wrong-filter
-   "Ctrl+R" redo
-   "J"      down
-   "K"      up
-   "R"      right
-   "U"      undo
-   "W"      wrong})
-
-(def menu
-  (remote.Menu.getApplicationMenu))
-
-(def menu-item
-  (-> {:label   "Shortcuts"
-       :submenu (map (fn [[k v]]
-                       {:accelerator k
-                        :label       ""
-                        :click       #(v)})
-                     keymap)}
-      clj->js
-      remote.MenuItem.))
-
 (defn bind
-  []
-  (menu.append menu-item)
-  (remote.Menu.setApplicationMenu menu))
+  [s e]
+  (js/Mousetrap.bind s #(e)))
 
-(defonce bound
-  (bind))
+(def bind-keymap
+  (partial run! (partial apply bind)))
+
+(def keymap
+  {"alt+a"  all-filter
+   "alt+r"  right-filter
+   "alt+d"  delete-filter
+   "alt+w"  wrong-filter
+   "ctrl+r" redo
+   "j"      down
+   "k"      up
+   "r"      right
+   "u"      undo
+   "w"      wrong})
+
+(bind-keymap keymap)
 
 (frp/activate)
