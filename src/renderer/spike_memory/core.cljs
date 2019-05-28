@@ -189,7 +189,7 @@
        (m/<$> (comp (partial str "say ")
                     last))))
 
-(def state
+(def modification
   (m/<$> rest (frp/snapshot source-progress
                             (frp/stepper (:path config) file-path)
                             ((aid/lift-a (comp (partial zipmap [:progress
@@ -390,7 +390,7 @@
                  (focus-window)))
          sink-current)
 
-(frp/run (partial apply spit) state)
+(frp/run (partial apply spit) modification)
 
 (frp/run electron.clipboard.writeText copy)
 
