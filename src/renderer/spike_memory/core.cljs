@@ -68,15 +68,17 @@
 
 (def edn-read-string
   (partial edn/read-string
-           {:readers {'linked/set (partial into (linked/set))}}))
+           {:readers {'linked/map (partial into (linked/map))
+                      'linked/set (partial into (linked/set))}}))
+
+(def slurp-read
+  (comp edn-read-string
+        slurp))
 
 (def config
-  (-> config-path
-      slurp
-      edn-read-string))
+  (slurp-read config-path))
 
-(frp/defe file-path
-          cancel
+(frp/defe cancel
           edit
           typing
           all-filter
@@ -96,6 +98,9 @@
           source-current
           source-progress)
 
+(def file-path
+  (frp/event (:path config)))
+
 (def review
   (->> edit
        (aid/<$ false)
@@ -110,8 +115,14 @@
                     str/split-lines
                     last))))
 
+(def file
+  (m/<$> slurp-read file-path))
+
 (def current-behavior
-  (frp/stepper (get-in local-storage [:state :current] "") source-current))
+  (->> file
+       (m/<$> :current)
+       (m/<> source-current)
+       (frp/stepper "")))
 
 (def stored-progress
   (get-in local-storage [:state :progress] (linked/map)))
