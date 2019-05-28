@@ -7,7 +7,7 @@
             [frp.clojure.core :as core]
             [frp.core :as frp]
             [garden.core :refer [css]]
-            [hodgepodge.core :refer [clear! local-storage]]
+            [hodgepodge.core :refer [local-storage]]
             [linked.core :as linked]
             [reagent.core :as r]
             [spike-memory.helpers :as helpers]))
@@ -34,7 +34,6 @@
           wrong
           delete
           save
-          clear
           yank
           undo
           redo
@@ -179,8 +178,7 @@
                                .-target.value
                                typing)}]
    [:button {:on-click #(cancel)} "Cancel"]
-   [:button {:on-click #(save)} "Save"]
-   [:button {:on-click #(clear)} "Clear"]])
+   [:button {:on-click #(save)} "Save"]])
 
 (def get-text-decoration
   #(case %
@@ -310,8 +308,6 @@
          sink-current)
 
 (frp/run (partial assoc! local-storage :state) state)
-
-(frp/run (partial clear! local-storage) clear)
 
 (defn bind
   [s e]
