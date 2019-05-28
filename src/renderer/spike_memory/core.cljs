@@ -19,8 +19,16 @@
 (def child-process
   (js/require "child_process"))
 
+(def path
+  (js/require "path"))
+
 (def remote
   electron.remote)
+
+(def config-path
+  (-> "userData"
+      remote.app.getPath
+      (path.join "config.edn")))
 
 (frp/defe cancel
           edit
