@@ -286,8 +286,10 @@
        ;Uncaught Error: Could not call remote function 'loadURL'. Check that the function signature is correct. Underlying error: Object has been destroyed
        (catch js/Error _)))
 
-(frp/run (comp (partial (aid/flip run!) contents)
-               render-content)
+(frp/run (juxt (comp (partial (aid/flip run!) contents)
+                     render-content)
+               (fn [_]
+                 (.focus (electron.remote.getCurrentWindow))))
          sink-current)
 
 (frp/run (partial assoc! local-storage :state) state)
