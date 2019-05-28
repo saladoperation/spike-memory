@@ -16,6 +16,9 @@
 (def window-state-keeper
   (js/require "electron-window-state"))
 
+(def child-process
+  (js/require "child_process"))
+
 (def remote
   electron.remote)
 
@@ -33,6 +36,7 @@
           delete
           save
           yank
+          say
           undo
           redo
           source-current
@@ -123,6 +127,11 @@
                  identity)
        (m/<$> (partial str/join "\n"))
        (frp/snapshot yank)
+       (m/<$> last)))
+
+(def pronunciation
+  (->> current-behavior
+       (frp/snapshot say)
        (m/<$> last)))
 
 (def state
@@ -287,6 +296,7 @@
    "j"      down
    "k"      up
    "r"      right
+   "s"      say
    "u"      undo
    "w"      wrong
    "d d"    delete
