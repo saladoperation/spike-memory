@@ -4,13 +4,11 @@
             [cats.core :as m]
             cljsjs.mousetrap
             [com.rpl.specter :as s]
-            [frp.clojure.core :as core]
             [frp.core :as frp]
             [garden.core :refer [css]]
             [hodgepodge.core :refer [local-storage]]
             [linked.core :as linked]
-            [reagent.core :as r]
-            [spike-memory.helpers :as helpers]))
+            [reagent.core :as r]))
 
 (def electron
   (js/require "electron"))
