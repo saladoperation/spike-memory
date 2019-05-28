@@ -5,3 +5,4 @@ jobs:
       - image: circleci/clojure:lein-2.9.1-node
     steps:
       - checkout
+      - run: script/circleci.sh
