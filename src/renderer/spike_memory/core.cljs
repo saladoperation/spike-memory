@@ -26,7 +26,7 @@
           all-filter
           right-filter
           wrong-filter
-          deleted-filter
+          delete-filter
           down
           up
           right
@@ -85,7 +85,7 @@
   (frp/stepper (get-in local-storage [:state :status] :all)
                (m/<> (aid/<$ :all all-filter)
                      (aid/<$ :right right-filter)
-                     (aid/<$ :deleted deleted-filter)
+                     (aid/<$ :delete delete-filter)
                      (aid/<$ :wrong wrong-filter))))
 
 (def filter-status
@@ -170,7 +170,7 @@
 (def get-text-decoration
   #(case %
      :wrong "underline"
-     :deleted "line-through"
+     :delete "line-through"
      "initial"))
 
 (def get-status-style
@@ -296,7 +296,7 @@
 (def keymap
   {"Alt+A"  all-filter
    "Alt+R"  right-filter
-   "Alt+D"  deleted-filter
+   "Alt+D"  delete-filter
    "Alt+W"  wrong-filter
    "Ctrl+R" redo
    "J"      down
