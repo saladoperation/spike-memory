@@ -285,6 +285,7 @@
    "alt+d"  delete-filter
    "alt+w"  wrong-filter
    "ctrl+r" redo
+   "ctrl+w" electron.remote.app.quit
    "j"      down
    "k"      up
    "r"      right
