@@ -22,12 +22,14 @@
 (frp/defe cancel
           edit
           typing
-          all
-          right
-          wrong
-          deleted
+          all-filter
+          right-filter
+          wrong-filter
+          deleted-filter
           down
           up
+          right
+          wrong
           sink-save
           save
           source-current
@@ -58,10 +60,10 @@
 
 (def status
   (frp/stepper (get-in local-storage [:state :status] :all)
-               (m/<> (aid/<$ :all all)
-                     (aid/<$ :right right)
-                     (aid/<$ :deleted deleted)
-                     (aid/<$ :wrong wrong))))
+               (m/<> (aid/<$ :all all-filter)
+                     (aid/<$ :right right-filter)
+                     (aid/<$ :deleted deleted-filter)
+                     (aid/<$ :wrong wrong-filter))))
 
 (def filter-status
   (->> status
@@ -239,12 +241,14 @@
 (frp/run (partial assoc! local-storage :state) state)
 
 (def keymap
-  {"Alt+A" all
-   "Alt+R" right
-   "Alt+D" deleted
-   "Alt+W" wrong
+  {"Alt+A" all-filter
+   "Alt+R" right-filter
+   "Alt+D" deleted-filter
+   "Alt+W" wrong-filter
    "J"     down
-   "K"     up})
+   "K"     up
+   "R"     right
+   "W"     wrong})
 
 (def menu
   (remote.Menu.getApplicationMenu))
