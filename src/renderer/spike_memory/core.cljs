@@ -73,13 +73,15 @@
                      (frp/snapshot (m/<> (aid/<$ :right right)
                                          (aid/<$ :wrong wrong)
                                          (aid/<$ :delete delete)))
-                     (m/<$> (partial apply (aid/flip array-map)))
-                     (m/<> (frp/event stored-progress)
-                           (m/<$> (comp (partial apply linked/map)
+                     (m/<$> (comp (aid/flip (aid/curry 2 merge))
+                                  (partial apply array-map)
+                                  reverse))
+                     (m/<> (m/<$> (comp constantly
+                                        (partial apply linked/map)
                                         (partial (aid/flip interleave)
                                                  (repeat :right)))
                                   words))
-                     core/merge)))
+                     (frp/accum stored-progress))))
 
 (def progress-behavior
   (frp/stepper stored-progress
