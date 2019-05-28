@@ -31,7 +31,6 @@
           up
           right
           wrong
-          sink-save
           save
           source-current
           source-progress)
