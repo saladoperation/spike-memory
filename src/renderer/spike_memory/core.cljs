@@ -306,7 +306,7 @@
                  {:display "none !important"})))
 
 (def focus-window
-  #(.focus (electron.remote.getCurrentWindow)))
+  #(.focus (remote.getCurrentWindow)))
 
 (defn bind
   [s e]
