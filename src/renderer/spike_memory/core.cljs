@@ -151,11 +151,13 @@
   (frp/stepper (linked/map) sink-progress))
 
 (def status
-  (frp/stepper (get-in local-storage [:state :status] :all)
-               (m/<> (aid/<$ :all all-filter)
-                     (aid/<$ :right right-filter)
-                     (aid/<$ :delete delete-filter)
-                     (aid/<$ :wrong wrong-filter))))
+  (->> file
+       (m/<$> :status)
+       (m/<> (aid/<$ :all all-filter)
+             (aid/<$ :right right-filter)
+             (aid/<$ :delete delete-filter)
+             (aid/<$ :wrong wrong-filter))
+       (frp/stepper :all)))
 
 (def filter-status
   (->> status
