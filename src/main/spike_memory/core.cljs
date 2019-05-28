@@ -1,6 +1,9 @@
 (ns spike-memory.core
   (:require [aid.core :as aid]
             [cljs-node-io.fs :as fs]
+            [cuerdas.core :as cuerdas]
+            [goog.object :as object]
+            [oops.core :refer [oget+]]
             [spike-memory.helpers :as helpers]))
 
 (def path
@@ -15,16 +18,34 @@
 (def app
   (.-app electron))
 
+(def memoized-keyword
+  (memoize cuerdas/keyword))
+
+(defn convert-keys
+  [ks x]
+  ;Doing memoization is visibly faster.
+  (->> ks
+       (mapcat (juxt memoized-keyword
+                     #(case (-> x
+                                (oget+ %)
+                                goog/typeOf)
+                        "function" (partial js-invoke x %)
+                        (oget+ x %))))
+       (apply hash-map)))
+
+;TODO move this function to aid
+(def convert-object
+  (aid/build convert-keys
+             object/getKeys
+             identity))
+
 (.on app
      "ready"
      (fn [_]
        (let [window-state (window-state-keeper. {})
              menu (electron.Menu.getApplicationMenu)
-             window (-> {:height         window-state.height
-                         :webPreferences {:nodeIntegration true}
-                         :width          window-state.width
-                         :x              window-state.x
-                         :y              window-state.y}
+             window (-> (merge (convert-object window-state)
+                               {:webPreferences {:nodeIntegration true}})
                         clj->js
                         electron.BrowserWindow.)]
          (doto
