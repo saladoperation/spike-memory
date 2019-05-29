@@ -10,7 +10,6 @@
             [com.rpl.specter :as s]
             [frp.core :as frp]
             [garden.core :refer [css]]
-            [hodgepodge.core :refer [local-storage]]
             [linked.core :as linked]
             [reagent.core :as r]
             [spike-memory.helpers :as helpers]))
