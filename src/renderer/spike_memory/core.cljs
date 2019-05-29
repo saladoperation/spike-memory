@@ -38,23 +38,24 @@
       (path.join "config.edn")))
 
 (def default-config
-  {:windows (linked/set {:url       "https://www.oxfordlearnersdictionaries.com/definition/english/"
-                         :selectors ["div#ad_contentslot_1"
-                                     "#ox-header"
-                                     "#header"
-                                     ".menu_button"
-                                     "#ad_topslot_a"
-                                     ".entry-header"
-                                     ".btn"
-                                     "#rightcolumn"
-                                     "span.dictlinks"
-                                     ".pron-link"
-                                     ".social-wrap"
-                                     "#rightcolumn"
-                                     "#ox-footer"
-                                     "a.go-to-top"]}
-                        {:url       "https://duckduckgo.com/?ia=images&iax=images&q="
-                         :selectors ["#header_wrapper"]})
+  ;TODO use linked/set
+  {:windows [{:url       "https://www.oxfordlearnersdictionaries.com/definition/english/"
+              :selectors ["div#ad_contentslot_1"
+                          "#ox-header"
+                          "#header"
+                          ".menu_button"
+                          "#ad_topslot_a"
+                          ".entry-header"
+                          ".btn"
+                          "#rightcolumn"
+                          "span.dictlinks"
+                          ".pron-link"
+                          ".social-wrap"
+                          "#rightcolumn"
+                          "#ox-footer"
+                          "a.go-to-top"]}
+             {:url       "https://duckduckgo.com/?ia=images&iax=images&q="
+              :selectors ["#header_wrapper"]}]
    :path    (->> (app.getName)
                  (str "new.")
                  (path.join (app.getPath "documents")))})
@@ -116,7 +117,12 @@
                     last))))
 
 (def file
-  (m/<$> slurp-read file-path))
+  (m/<$> (aid/if-then-else fs/fexists?
+                           slurp-read
+                           (constantly {:progress (linked/map)
+                                        :current  ""
+                                        :status   :all}))
+         file-path))
 
 (def current-behavior
   (->> file
