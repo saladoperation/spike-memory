@@ -12,7 +12,8 @@
             [garden.core :refer [css]]
             [hodgepodge.core :refer [local-storage]]
             [linked.core :as linked]
-            [reagent.core :as r]))
+            [reagent.core :as r]
+            [spike-memory.helpers :as helpers]))
 
 (def electron
   (js/require "electron"))
@@ -412,6 +413,10 @@
 (frp/run electron.clipboard.writeText copy)
 
 (frp/run child-process.exec command)
+
+(.ipcRenderer.on electron helpers/channel (comp file-path
+                                                last
+                                                vector))
 
 (bind-keymap keymap)
 

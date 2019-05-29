@@ -2,6 +2,7 @@
   (:require [aid.core :as aid]
             [cljs-node-io.fs :as fs]
             [cuerdas.core :as cuerdas]
+            [frp.core :as frp]
             [goog.object :as object]
             [oops.core :refer [oget+]]
             [spike-memory.helpers :as helpers]))
@@ -39,16 +40,26 @@
              object/getKeys
              identity))
 
+(frp/defe file-path)
+
 (.on app
      "ready"
      (fn [_]
-       (let [window-state (window-state-keeper. {})]
+       (let [window-state (window-state-keeper. {})
+             window (-> window-state
+                        convert-object
+                        (merge {:webPreferences {:nodeIntegration true}})
+                        clj->js
+                        electron.BrowserWindow.)]
          (doto
-           (-> window-state
-               convert-object
-               (merge {:webPreferences {:nodeIntegration true}})
-               clj->js
-               electron.BrowserWindow.)
+           window
+           (.webContents.on "did-finish-load"
+                            (fn []
+                              (frp/run #(.webContents.send window
+                                                           helpers/channel
+                                                           %)
+                                       file-path)
+                              (frp/activate)))
            (.loadURL
              (->> "index.html"
                   (helpers/get-path helpers/public)
@@ -60,3 +71,7 @@
                                           js/__dirname))
                   (str "file://")))
            window-state.manage))))
+
+(.on app "will-finish-launching" #(.on app "open-file" (comp file-path
+                                                             last
+                                                             vector)))

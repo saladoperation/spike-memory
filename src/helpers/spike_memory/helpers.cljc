@@ -10,3 +10,6 @@
 
 (def public
   "public")
+
+(def channel
+  "channel")
