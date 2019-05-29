@@ -415,8 +415,10 @@
                  (focus-window)))
          sink-current)
 
-(frp/run (partial (aid/flip shell.openExternal) #js{:activate false})
-         browser-url)
+;TODO uncomment the following when the issue is resolved
+;https://github.com/electron/electron/issues/12492
+;(frp/run (partial (aid/flip shell.openExternal) #js{:activate false})
+;         browser-url)
 
 (frp/run (partial apply spit) modification)
 
