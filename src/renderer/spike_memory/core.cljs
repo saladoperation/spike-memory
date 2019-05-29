@@ -395,10 +395,10 @@
                        :selectors
                        get-css
                        window.webContents.insertCSS))
-           ;the catch clause works around the following error.
+           ;The catch clause works around the following error.
            ;Uncaught (in promise) Error: ERR_ABORTED (-3) loading
            (.catch aid/nop))
-       ;the catch clause works around the following error.
+       ;The catch clause works around the following error.
        ;Uncaught Error: Could not call remote function 'loadURL'. Check that the function signature is correct. Underlying error: Object has been destroyed
        (catch js/Error _)))
 
