@@ -38,8 +38,11 @@
       (path.join "config.edn")))
 
 (def default-config
-  ;TODO use linked/set
-  {:windows [{:url       "https://www.oxfordlearnersdictionaries.com/definition/english/"
+  {:path    (->> (app.getName)
+                 (str "new.")
+                 (path.join (app.getPath "documents")))
+   ;TODO use linked/set
+   :windows [{:url       "https://www.oxfordlearnersdictionaries.com/definition/english/"
               :selectors ["div#ad_contentslot_1"
                           "#ox-header"
                           "#header"
@@ -55,10 +58,7 @@
                           "#ox-footer"
                           "a.go-to-top"]}
              {:url       "https://duckduckgo.com/?ia=images&iax=images&q="
-              :selectors ["#header_wrapper"]}]
-   :path    (->> (app.getName)
-                 (str "new.")
-                 (path.join (app.getPath "documents")))})
+              :selectors ["#header_wrapper"]}]})
 
 (def default-config-text
   (with-out-str (pprint/pprint default-config)))
