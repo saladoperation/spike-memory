@@ -38,7 +38,8 @@
       (path.join "config.edn")))
 
 (def default-config
-  {:path    (->> (app.getName)
+  {:browser "https://www.youtube.com/results?search_query="
+   :path    (->> (app.getName)
                  (str "new.")
                  (path.join (app.getPath "documents")))
    ;TODO use linked/set
@@ -377,7 +378,7 @@
 (loop-event {source-current  sink-current
              source-progress sink-progress})
 
-(defonce contents
+(defonce content
   (->> config
        :windows
        (map-indexed (fn [k v]
@@ -401,11 +402,21 @@
        ;Uncaught Error: Could not call remote function 'loadURL'. Check that the function signature is correct. Underlying error: Object has been destroyed
        (catch js/Error _)))
 
-(frp/run (juxt (comp (partial (aid/flip run!) contents)
+(def shell
+  electron.shell)
+
+(def browser-url
+  (m/<$> (partial str (:browser config))
+         sink-current))
+
+(frp/run (juxt (comp (partial (aid/flip run!) content)
                      render-content)
                (fn [_]
                  (focus-window)))
          sink-current)
+
+(frp/run (partial (aid/flip shell.openExternal) #js{:activate false})
+         browser-url)
 
 (frp/run (partial apply spit) modification)
 
