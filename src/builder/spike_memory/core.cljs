@@ -15,7 +15,8 @@
   ["zip"])
 
 (def config
-  {:config  {:directories {:output output}}
+  {:config  {:directories      {:output output}
+             :fileAssociations {:ext "spike-memory"}}
    :linux   target
    :mac     target
    :publish "always"})
