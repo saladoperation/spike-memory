@@ -38,8 +38,7 @@
       (path.join "config.edn")))
 
 (def default-config
-  {:browser "https://www.youtube.com/results?search_query="
-   :path    (->> (app.getName)
+  {:path    (->> (app.getName)
                  (str "new.")
                  (path.join (app.getPath "documents")))
    ;TODO use linked/set
@@ -59,7 +58,9 @@
                           "#ox-footer"
                           "a.go-to-top"]}
              {:url       "https://duckduckgo.com/?ia=images&iax=images&q="
-              :selectors ["#header_wrapper"]}]})
+              :selectors ["#header_wrapper"]}
+             {:url       "https://www.youtube.com/results?search_query="
+              :selectors []}]})
 
 (def default-config-text
   (with-out-str (pprint/pprint default-config)))
@@ -402,23 +403,11 @@
        ;Uncaught Error: Could not call remote function 'loadURL'. Check that the function signature is correct. Underlying error: Object has been destroyed
        (catch js/Error _)))
 
-(def shell
-  electron.shell)
-
-(def browser-url
-  (m/<$> (partial str (:browser config))
-         sink-current))
-
 (frp/run (juxt (comp (partial (aid/flip run!) content)
                      render-content)
                (fn [_]
                  (focus-window)))
          sink-current)
-
-;TODO uncomment the following when the issue is resolved
-;https://github.com/electron/electron/issues/12492
-;(frp/run (partial (aid/flip shell.openExternal) #js{:activate false})
-;         browser-url)
 
 (frp/run (partial apply spit) modification)
 
