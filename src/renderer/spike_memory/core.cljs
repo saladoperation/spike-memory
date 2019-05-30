@@ -60,7 +60,9 @@
              {:url       "https://duckduckgo.com/?ia=images&iax=images&q="
               :selectors ["#header_wrapper"]}
              {:url       "https://www.youtube.com/results?search_query="
-              :selectors []}]})
+              :selectors ["#masthead-container"
+                          "#items"
+                          "#header-container"]}]})
 
 (def default-config-text
   (with-out-str (pprint/pprint default-config)))
